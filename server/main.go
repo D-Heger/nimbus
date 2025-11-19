@@ -38,7 +38,7 @@ func main() {
 	}
 	defer listener.Close()
 
-	fmt.Println("Welcome to the Nimbus! Running v0.0.2")
+	fmt.Printf("Welcome to the Nimbus! Running %s (Protocol v%d)\n", raindrop.SoftwareVersion, raindrop.ProtocolVersion)
 	fmt.Println("Loaded certificates from", certDir)
 	fmt.Println("Nimbus Server listening on :8080 (TLS)")
 
@@ -62,7 +62,12 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	if packet.Type == raindrop.CmdData {
+	if packet.Version != raindrop.ProtocolVersion {
+		fmt.Printf("Received packet with incompatible version: %d (expected %d)\n", packet.Version, raindrop.ProtocolVersion)
+		return
+	}
+
+	if packet.Type == raindrop.CmdChunk {
 		fmt.Printf("Received: %s", string(packet.Payload))
 	} else {
 		fmt.Printf("Received unknown packet type: %d\n", packet.Type)
