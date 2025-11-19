@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/D-Heger/nimbus/raindrop"
 )
 
 func main() {
@@ -28,6 +30,7 @@ func main() {
 		}
 		sendMessage(message)
 	default:
+		fmt.Println("Welcome to the Nimbus! Running v0.0.2")
 		fmt.Println("Usage: nimbus -send <message>")
 		os.Exit(1)
 	}
@@ -54,7 +57,7 @@ func sendMessage(message string) {
 	}
 	defer conn.Close()
 
-	_, err = conn.Write([]byte(message))
+	err = raindrop.WritePacket(conn, raindrop.CmdData, []byte(message))
 	if err != nil {
 		fmt.Println("Error sending message:", err)
 		os.Exit(1)

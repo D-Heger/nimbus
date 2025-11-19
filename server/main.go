@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"os"
 	"path/filepath"
+
+	"github.com/D-Heger/nimbus/raindrop"
 )
 
 func main() {
@@ -37,6 +38,8 @@ func main() {
 	}
 	defer listener.Close()
 
+	fmt.Println("Welcome to the Nimbus! Running v0.0.2")
+	fmt.Println("Loaded certificates from", certDir)
 	fmt.Println("Nimbus Server listening on :8080 (TLS)")
 
 	for {
@@ -53,12 +56,15 @@ func main() {
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
-	reader := bufio.NewReader(conn)
-	message, err := reader.ReadString('\n')
+	packet, err := raindrop.ReadPacket(conn)
 	if err != nil {
-		fmt.Println("Error reading from connection:", err)
+		fmt.Println("Error reading packet:", err)
 		return
 	}
 
-	fmt.Printf("Received: %s", message)
+	if packet.Type == raindrop.CmdData {
+		fmt.Printf("Received: %s", string(packet.Payload))
+	} else {
+		fmt.Printf("Received unknown packet type: %d\n", packet.Type)
+	}
 }
